@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hydra-Password Generator</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        
+        .container {
+            background-color: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            width: 100%;
+            max-width: 500px;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        h1 {
+            color: #2575fc;
+            margin-bottom: 20px;
+            font-size: 28px;
+        }
+        
+        .description {
+            color: #666;
+            margin-bottom: 30px;
+            line-height: 1.5;
+        }
+        
+        .input-group {
+            margin-bottom: 20px;
+            text-align: left;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #555;
+        }
+        
+        input[type="number"] {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+        
+        input[type="number"]:focus {
+            border-color: #2575fc;
+            outline: none;
+        }
+        
+        select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            background-color: white;
+        }
+        
+        button {
+            background: linear-gradient(to right, #6a11cb, #2575fc);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 8px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            margin-top: 10px;
+            width: 100%;
+        }
+        
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(38, 117, 252, 0.4);
+        }
+        
+        button:active {
+            transform: translateY(0);
+        }
+        
+        .password-display {
+            margin-top: 30px;
+            padding: 20px;
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            border: 2px dashed #ddd;
+            font-size: 18px;
+            word-break: break-all;
+            position: relative;
+            min-height: 80px;
+        }
+        
+        .password-text {
+            margin: 0;
+            color: #2575fc;
+            font-weight: 600;
+            font-size: 22px;
+            letter-spacing: 1px;
+        }
+        
+        .copy-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: #6a11cb;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 5px 10px;
+            font-size: 12px;
+            cursor: pointer;
+        }
+        
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 25px;
+            background-color: #4CAF50;
+            color: white;
+            border-radius: 8px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        
+        .notification.show {
+            opacity: 1;
+        }
+        
+        .strength-meter {
+            height: 10px;
+            border-radius: 5px;
+            margin-top: 10px;
+            background-color: #eee;
+        }
+        
+        .strength-fill {
+            height: 100%;
+            border-radius: 5px;
+            width: 0%;
+            transition: width 0.3s, background-color 0.3s;
+        }
+        
+        .history {
+            margin-top: 20px;
+            text-align: left;
+        }
+        
+        .history h3 {
+            color: #2575fc;
+            margin-bottom: 10px;
+        }
+        
+        .history-list {
+            list-style-type: none;
+            max-height: 120px;
+            overflow-y: auto;
+            border: 1px solid #eee;
+            border-radius: 8px;
+            padding: 10px;
+        }
+        
+        .history-item {
+            padding: 5px 0;
+            border-bottom: 1px solid #eee;
+            font-family: monospace;
+        }
+        
+        .history-item:last-child {
+            border-bottom: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Hydra-Password Generator</h1>
+        <p class="description">Generate strong and secure passwords with custom length and character repetition options.</p>
+        
+        <div class="input-group">
+            <label for="length">Password Length:</label>
+            <input type="number" id="length" min="4" max="50" value="12">
+        </div>
+        
+        <div class="input-group">
+            <label for="repetition">Allow Character Repetition:</label>
+            <select id="repetition">
+                <option value="2">Yes</option>
+                <option value="1">No</option>
+            </select>
+        </div>
+        
+        <button id="generate-btn">Generate Password</button>
+        
+        <div class="password-display" id="password-display">
+            <p class="password-text" id="password-text">Your password will appear here</p>
+            <button class="copy-btn" id="copy-btn">Copy</button>
+            <div class="strength-meter">
+                <div class="strength-fill" id="strength-fill"></div>
+            </div>
+        </div>
+        
+        <div class="history">
+            <h3>Recently Generated</h3>
+            <ul class="history-list" id="history-list"></ul>
+        </div>
+    </div>
+    
+    <div class="notification" id="notification">Password copied to clipboard!</div>
+
+    <script>
+        // Define the character set
+        const characterString = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!#$%&'()*+,-./:;<=>?@[\\]^_`{|}~";
+        
+        // Get DOM elements
+        const lengthInput = document.getElementById('length');
+        const repetitionSelect = document.getElementById('repetition');
+        const generateBtn = document.getElementById('generate-btn');
+        const passwordDisplay = document.getElementById('password-display');
+        const passwordText = document.getElementById('password-text');
+        const copyBtn = document.getElementById('copy-btn');
+        const notification = document.getElementById('notification');
+        const strengthFill = document.getElementById('strength-fill');
+        const historyList = document.getElementById('history-list');
+        
+        // Password history array
+        const passwordHistory = [];
+        
+        // Generate password function
+        function generatePassword() {
+            try {
+                const length = parseInt(lengthInput.value);
+                const repeat = parseInt(repetitionSelect.value);
+                
+                if (isNaN(length) || length <= 0) {
+                    alert("Please enter a valid password length");
+                    return;
+                }
+                
+                if (repeat !== 1 && repeat !== 2) {
+                    alert("Please select a valid repetition option");
+                    return;
+                }
+                
+                let password = '';
+                
+                if (repeat === 1) {
+                    // Without repetition (if length is greater than available characters, it will fail)
+                    if (length > characterString.length) {
+                        alert(`Password length cannot exceed ${characterString.length} when repetition is not allowed`);
+                        return;
+                    }
+                    
+                    // Create an array of shuffled characters and take the required length
+                    const shuffled = characterString.split('').sort(() => 0.5 - Math.random());
+                    password = shuffled.slice(0, length).join('');
+                } else {
+                    // With repetition
+                    for (let i = 0; i < length; i++) {
+                        const randomIndex = Math.floor(Math.random() * characterString.length);
+                        password += characterString[randomIndex];
+                    }
+                }
+                
+                // Display the password
+                passwordText.textContent = password;
+                passwordDisplay.style.display = 'block';
+                
+                // Calculate and display password strength
+                calculatePasswordStrength(password);
+                
+                // Add to history
+                addToHistory(password);
+                
+            } catch (error) {
+                alert("An error occurred while generating the password");
+                console.error(error);
+            }
+        }
+        
+        // Calculate password strength
+        function calculatePasswordStrength(password) {
+            let strength = 0;
+            
+            // Length factor (up to 25 points)
+            strength += Math.min(password.length * 2, 25);
+            
+            // Character variety factors
+            if (/[A-Z]/.test(password)) strength += 10; // Uppercase letters
+            if (/[a-z]/.test(password)) strength += 10; // Lowercase letters
+            if (/[0-9]/.test(password)) strength += 10; // Numbers
+            if (/[^A-Za-z0-9]/.test(password)) strength += 15; // Special characters
+            
+            // Repetition penalty
+            const charCount = {};
+            for (const char of password) {
+                charCount[char] = (charCount[char] || 0) + 1;
+            }
+            
+            const maxRepeat = Math.max(...Object.values(charCount));
+            if (maxRepeat > 1) {
+                strength -= (maxRepeat - 1) * 5;
+            }
+            
+            // Ensure strength is between 0 and 100
+            strength = Math.max(0, Math.min(strength, 100));
+            
+            // Update the strength meter
+            strengthFill.style.width = `${strength}%`;
+            
+            // Set color based on strength
+            if (strength < 40) {
+                strengthFill.style.backgroundColor = '#e74c3c'; // Red
+            } else if (strength < 70) {
+                strengthFill.style.backgroundColor = '#f39c12'; // Orange
+            } else {
+                strengthFill.style.backgroundColor = '#2ecc71'; // Green
+            }
+        }
+        
+        // Copy password to clipboard
+        function copyToClipboard() {
+            const password = passwordText.textContent;
+            if (!password || password === "Your password will appear here") return;
+            
+            navigator.clipboard.writeText(password).then(() => {
+                // Show notification
+                notification.classList.add('show');
+                
+                // Hide notification after 2 seconds
+                setTimeout(() => {
+                    notification.classList.remove('show');
+                }, 2000);
+            }).catch(err => {
+                console.error('Failed to copy: ', err);
+                alert('Failed to copy password to clipboard');
+            });
+        }
+        
+        // Add password to history
+        function addToHistory(password) {
+            // Add to beginning of array
+            passwordHistory.unshift(password);
+            
+            // Keep only last 5 passwords
+            if (passwordHistory.length > 5) {
+                passwordHistory.pop();
+            }
+            
+            // Update history list
+            updateHistoryList();
+        }
+        
+        // Update history list display
+        function updateHistoryList() {
+            // Clear current list
+            historyList.innerHTML = '';
+            
+            // Add each password to the list
+            passwordHistory.forEach(password => {
+                const li = document.createElement('li');
+                li.className = 'history-item';
+                li.textContent = password;
+                historyList.appendChild(li);
+            });
+        }
+        
+        // Add event listeners
+        generateBtn.addEventListener('click', generatePassword);
+        copyBtn.addEventListener('click', copyToClipboard);
+        
+        // Allow generating password with Enter key
+        document.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                generatePassword();
+            }
+        });
+        
+        // Initialize with a password on load
+        window.addEventListener('load', () => {
+            generatePassword();
+        });
+    </script>
+</body>
+</html>
